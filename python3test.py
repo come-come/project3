@@ -8,6 +8,7 @@
 import tensorflow as tf
 import numpy
 import matplotlib.pyplot as plt
+import tensorflow as tf
 rng = numpy.random
 
 def tiduxiajiang():
@@ -68,4 +69,10 @@ def check_vocabulary():
             print (line_str)
 
 if __name__ =='__main__':
-    check_vocabulary()
+    # check_vocabulary()
+    a = tf.placeholder("float")
+    b = tf.placeholder("float")
+    y = tf.multiply(a, b)
+    sess = tf.Session()
+    print (sess.run(y, feed_dict={a:3, b:4}))
+    sess.close()
