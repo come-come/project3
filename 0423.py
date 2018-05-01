@@ -24,7 +24,7 @@ def extract_character_vocab(data):
     构造映射表
     '''
     special_words = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
-    set_words = list(set([character for line in data.split('\n') for character in line]))
+    set_words = list(set([character for line in data.split('\n') for character in line.strip().split(' ')]))
     int_to_vocab = {idx: word for idx, word in enumerate(special_words + set_words)}
     vocab_to_int = {word: idx for idx, word in int_to_vocab.items()}
     return int_to_vocab, vocab_to_int
@@ -228,9 +228,9 @@ def get_batches(targets, sources, batch_size, source_pad_int, target_pad_int):
 if __name__ == '__main__':
     # sorted_vocb()
 
-    with open('G:\project3\Data\\train\\reverse\\vocb.txt', 'r',encoding='gb18030',errors='ignore') as f:
+    with open('G:\project3\Data\\train\genes\genes_one_line_space.txt', 'r',encoding='gb18030',errors='ignore') as f:
         source_data = f.read()
-    with open('G:\project3\Data\\train\\reverse\\vocb_sorted.txt', 'r') as f:
+    with open('G:\project3\Data\\train\\terms\\terms.txt', 'r') as f:
         target_data = f.read()
 
     print (source_data.split('\n')[:10]) # 前十行
@@ -359,7 +359,7 @@ if __name__ == '__main__':
     # 输入一个单词
     input_word = 'common'
     input_word = 'lujunya'
-    input_word = 'wwh'
+    input_word = 'apolipoprotein A1 apolipoprotein A2 apolipoprotein C3'
     text = source_to_seq(input_word)
 
     checkpoint = "./trained_model.ckpt"
