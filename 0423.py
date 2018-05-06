@@ -25,6 +25,7 @@ def extract_character_vocab(data):
     '''
     special_words = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
     set_words = list(set([character for line in data.split('\n') for character in line.strip().split(' ')]))
+    print (set_words)
     int_to_vocab = {idx: word for idx, word in enumerate(special_words + set_words)}
     vocab_to_int = {word: idx for idx, word in int_to_vocab.items()}
     return int_to_vocab, vocab_to_int
@@ -68,6 +69,8 @@ def get_encoder_layer(input_data, rnn_size, num_layers,
         lstm_cell = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
         return lstm_cell
 
+    # 如果希望整个网络的层数更多（例如上图表示一个两层的RNN，第一层Cell的output还要作为下一层Cell的输入），
+    # 应该堆叠多个LSTM Cell，tensorflow给我们提供了MultiRNNCell，因此堆叠多层网络只生成这个类即可
     cell = tf.contrib.rnn.MultiRNNCell([get_lstm_cell(rnn_size) for _ in range(num_layers)])
 
     encoder_output, encoder_state = tf.nn.dynamic_rnn(cell, encoder_embed_input,
@@ -104,7 +107,7 @@ def decoding_layer(target_letter_to_int, decoding_embedding_size, num_layers, rn
 
     cell = tf.contrib.rnn.MultiRNNCell([get_decoder_cell(rnn_size) for _ in range(num_layers)])
 
-    # 3. Output全连接层
+    # 3. Output全连接层 create output layer to map the outputs
     output_layer = Dense(target_vocab_size,
                          kernel_initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
 
@@ -185,7 +188,7 @@ def source_to_seq(text):
     对源数据进行转换
     '''
     sequence_length = 30
-    return [source_letter_to_int.get(word, source_letter_to_int['<UNK>']) for word in text] + [source_letter_to_int['<PAD>']]*(sequence_length-len(text))
+    return [source_letter_to_int.get(word, source_letter_to_int['<UNK>']) for word in text.split(' ')] + [source_letter_to_int['<PAD>']]*(sequence_length-len(text))
 
 
 
@@ -228,9 +231,13 @@ def get_batches(targets, sources, batch_size, source_pad_int, target_pad_int):
 if __name__ == '__main__':
     # sorted_vocb()
 
-    with open('G:\project3\Data\\train\genes\genes_one_line_space.txt', 'r',encoding='gb18030',errors='ignore') as f:
+    # with open('G:\project3\Data\\train\genes\genes_one_line_space.txt', 'r',encoding='gb18030',errors='ignore') as f:
+    #     source_data = f.read()
+    # with open('G:\project3\Data\\train\\terms\\terms.txt', 'r') as f:
+    #     target_data = f.read()
+    with open('genes0504.txt', 'r',encoding='gb18030',errors='ignore') as f:
         source_data = f.read()
-    with open('G:\project3\Data\\train\\terms\\terms.txt', 'r') as f:
+    with open('terms0504.txt', 'r') as f:
         target_data = f.read()
 
     print (source_data.split('\n')[:10]) # 前十行
@@ -241,8 +248,8 @@ if __name__ == '__main__':
     print (source_letter_to_int['<UNK>'], target_letter_to_int['<UNK>'],target_letter_to_int['<EOS>'] )
 
     # dictionary.get(key, default=None)
-    source_int = [[source_letter_to_int.get(letter, source_letter_to_int['<UNK>']) for letter in line] for line in source_data.split('\n')]
-    target_int = [[target_letter_to_int.get(letter, target_letter_to_int['<UNK>']) for letter in line] + [target_letter_to_int['<EOS>']] for line in target_data.split('\n')]
+    source_int = [[source_letter_to_int.get(letter, source_letter_to_int['<UNK>']) for letter in line.strip().split(' ')] for line in source_data.split('\n')]
+    target_int = [[target_letter_to_int.get(letter, target_letter_to_int['<UNK>']) for letter in line.strip().split(' ')] + [target_letter_to_int['<EOS>']] for line in target_data.split('\n')]
 
     print (source_int[:10]) # 将每个单词转换为一个数组向量
     print (target_int[:10])
@@ -315,7 +322,7 @@ if __name__ == '__main__':
         display_step = 50  # 每隔50轮输出loss
 
         # checkpoint = "trained_model.ckpt"
-        checkpoint = "./trained_model.ckpt"
+        checkpoint = "./trained_model0504.ckpt"
         with tf.Session(graph=train_graph) as sess:
             sess.run(tf.global_variables_initializer())
 
@@ -357,12 +364,12 @@ if __name__ == '__main__':
             print('Model Trained and Saved')
 
     # 输入一个单词
-    input_word = 'common'
-    input_word = 'lujunya'
+    # input_word = 'common'
+    # input_word = 'lujunya'
     input_word = 'apolipoprotein A1 apolipoprotein A2 apolipoprotein C3'
     text = source_to_seq(input_word)
 
-    checkpoint = "./trained_model.ckpt"
+    checkpoint = "./trained_model0504.ckpt"
 
     loaded_graph = tf.Graph()
     with tf.Session(graph=loaded_graph) as sess:

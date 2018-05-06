@@ -37,8 +37,8 @@ def add_columns():
             term_def = line.split('\t')[0]
             fw.write(dic_id[term_def] + '\t' + dic_name[term_def] + '\t' + line)
         except:
-            print term_def
-            print line
+            print (term_def)
+            print (line)
             continue
 
     fw.close()
@@ -55,7 +55,7 @@ def check_genes():
         name = data.loc[i]['Symbol']
         describ = data.loc[i]['description']
         dic_gene_des[describ] = name
-    print 'generate gene-describtion dictornary:', len(dic_gene_des)
+    print ('generate gene-describtion dictornary:', len(dic_gene_des))
     return dic_gene_des
 def trans_des_to_gene(dic_gene_des):
     # 将基因的描述和基因关联起来
@@ -69,10 +69,10 @@ def trans_des_to_gene(dic_gene_des):
             try:
                 fw.write('\t' + dic_gene_des[line_str[x]])
             except:
-                print line_str[x]
+                print (line_str[x])
                 list.append(line_str[x])
         fw.write('\n')
-    print len(set(list))
+    print (len(set(list)))
 
     fw.close()
 def number_genes():
@@ -93,7 +93,7 @@ def number_genes():
             dic_def[term_id] = term_def
         else:
             continue
-    print 'The number of term from obo file', len(dic_def)
+    print ('The number of term from obo file', len(dic_def))
 
     # 基因的信息
     dic_gene_des = {}
@@ -103,7 +103,7 @@ def number_genes():
         name = data.loc[i]['Symbol']
         describ = data.loc[i]['description']
         dic_gene_des[name] = describ
-    print 'generate gene-describtion dictornary:', len(dic_gene_des)
+    print ('generate gene-describtion dictornary:', len(dic_gene_des))
 
     # GO 注释基因
     dic_term_gene ={}
@@ -117,7 +117,7 @@ def number_genes():
         except:
             dic_term_gene[term] = []
             dic_term_gene[term].append(gene)
-    print 'The number of term from annotation file:', len(dic_term_gene)
+    print ('The number of term from annotation file:', len(dic_term_gene))
 
 
     fw1 = open('G:\project3\\Data\description_gene_lu.txt', 'w')
@@ -133,7 +133,7 @@ def number_genes():
             # 生成训练数据和测试数据
 
         except:
-            print i
+            print (i)
 
     fw1.close()
     fw2.close()
@@ -156,7 +156,8 @@ if __name__ == '__main__':
     # trans_des_to_gene(dic_gene_des)
     # print dic_gene_des['immunoglobulin heavy constant gamma 1 (G1m marker)']
     # number_genes()
-    split_train_test()
+    # split_train_test()
+    print ('ee')
 
 
 
