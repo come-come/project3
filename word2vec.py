@@ -15,12 +15,13 @@ from string import punctuation
 # LineSentence('G:\project3\\Data\\train\\genes\\genes_one_line_space.txt')
 # model = word2vec.Word2Vec(LineSentence('G:\project3\\Data\\train\\genes\\genes_one_line_space.txt'))
 # model = word2vec.Word2Vec(LineSentence('G:\project3\\Data\\train\\terms\\terms.txt'))
-model = word2vec.Word2Vec(LineSentence('G:\project3\\Data\\train\\all.txt'))
+model = word2vec.Word2Vec(LineSentence('genes0504.txt'),min_count=0)
+print (model['C1Q'])
 print ('the number of vocabulary', len(model.wv.vocab))
 vocab = list(model.wv.vocab.keys())
 print(vocab[:10])
-model.save('G:\project3\\Data\\train\\w2v.model')
-model.wv.save_word2vec_format('G:\project3\\Data\\train\\vector_all.txt')
+# model.save('G:\project3\\Data\\train\\w2v.model')
+# model.wv.save_word2vec_format('G:\project3\\Data\\train\\vector_genes0504.txt')
 
 
 # print (model.similarity('dogs', 'you'))

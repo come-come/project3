@@ -10,6 +10,7 @@ import time
 import tensorflow as tf
 from tensorflow.python.layers.core import Dense
 
+'''
 def sorted_vocb():
 
     fr = open('G:\project3\Data\\train\\reverse\\vocb.txt',encoding='gb18030',errors='ignore')
@@ -19,13 +20,27 @@ def sorted_vocb():
             new_line = sorted(line.strip())
             fw.write(''.join(new_line) + '\n')
     fw.close()
-def extract_character_vocab(data):
+'''
+def extract_character_vocab(data, target_data):
     '''
     构造映射表
     '''
     special_words = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
     set_words = list(set([character for line in data.split('\n') for character in line.strip().split(' ')]))
-    print (set_words)
+    print (len(data.split('\n')))
+    print (data.split('\n')[:5])
+    print ('number of words:', len(set_words))
+
+    set_words_target = list(set([character for line in target_data.split('\n') for character in line.strip().split(' ')]))
+    print (len(target_data.split('\n')))
+    print (target_data.split('\n')[:5])
+    print('number of words:', len(set_words_target))
+
+    set_words = list(set(set_words+ set_words_target))
+
+    print('number of words:', len(set_words))
+
+
     int_to_vocab = {idx: word for idx, word in enumerate(special_words + set_words)}
     vocab_to_int = {word: idx for idx, word in int_to_vocab.items()}
     return int_to_vocab, vocab_to_int
@@ -46,6 +61,15 @@ def get_inputs():
 
     return inputs, targets, learning_rate, target_sequence_length, max_target_sequence_length, source_sequence_length
 
+def process_decoder_input(target_data, vocab_to_int, batch_size):
+    '''
+    Preprocess target data for dencoding
+    target开头补充<GO>，并移除最后一个字符
+    '''
+    # cut掉最后一个字符
+    ending = tf.strided_slice(target_data, [0, 0], [batch_size, -1], [1, 1])
+    decoder_input = tf.concat([tf.fill([batch_size, 1], vocab_to_int['<GO>']), ending], 1)
+    return decoder_input
 
 def get_encoder_layer(input_data, rnn_size, num_layers,
                       source_sequence_length, source_vocab_size,
@@ -63,6 +87,7 @@ def get_encoder_layer(input_data, rnn_size, num_layers,
     '''
     # Encoder embedding
     encoder_embed_input = tf.contrib.layers.embed_sequence(input_data, source_vocab_size, encoding_embedding_size)
+
 
     # RNN cell
     def get_lstm_cell(rnn_size):
@@ -173,15 +198,7 @@ def seq2seq_model(input_data, targets, lr, target_sequence_length,
 
     return training_decoder_output, predicting_decoder_output
 
-def process_decoder_input(data, vocab_to_int, batch_size):
-    '''
-    补充<GO>，并移除最后一个字符
-    '''
-    # cut掉最后一个字符
-    ending = tf.strided_slice(data, [0, 0], [batch_size, -1], [1, 1])
-    decoder_input = tf.concat([tf.fill([batch_size, 1], vocab_to_int['<GO>']), ending], 1)
 
-    return decoder_input
 
 def source_to_seq(text):
     '''
@@ -240,10 +257,12 @@ if __name__ == '__main__':
     with open('terms0504.txt', 'r') as f:
         target_data = f.read()
 
-    print (source_data.split('\n')[:10]) # 前十行
-    print (target_data.split('\n')[:10])
-    source_int_to_letter, source_letter_to_int = extract_character_vocab(source_data)
-    target_int_to_letter, target_letter_to_int = extract_character_vocab(target_data)
+    print (source_data.split('\n')[:5]) # 前十行
+    print (target_data.split('\n')[:5])
+    source_int_to_letter, source_letter_to_int = extract_character_vocab(source_data, target_data)
+    # target_int_to_letter, target_letter_to_int = extract_character_vocab(target_data)
+    target_int_to_letter = source_int_to_letter
+    target_letter_to_int = source_letter_to_int
 
     print (source_letter_to_int['<UNK>'], target_letter_to_int['<UNK>'],target_letter_to_int['<EOS>'] )
 
@@ -362,7 +381,8 @@ if __name__ == '__main__':
             saver = tf.train.Saver()
             saver.save(sess, checkpoint)
             print('Model Trained and Saved')
-
+            # visulization
+            writer = tf.train.SummaryWriter(logdir="./log", graph=train_graph)
     # 输入一个单词
     # input_word = 'common'
     # input_word = 'lujunya'
